@@ -2,7 +2,7 @@ FROM debian:jessie
 
 MAINTAINER IMXQD <ahtlxqd@gmail.com>
 
-ADD https://bin.equinox.io/c/VdrWdbjqyF/cloudflared-stable-linux-amd64.deb /cloudflare.deb
+ADD cloudflared-stable-linux-amd64.deb /cloudflare.deb
 
 RUN apt-get update && \
     apt-get install -y ca-certificates && \
@@ -18,4 +18,9 @@ ENV LOCAL_PORT 5311
 
 EXPOSE $LOCAL_PORT/tcp $LOCAL_PORT/udp
 
-CMD  cloudflared proxy-dns --port $LOCAL_PORT --address 0.0.0.0
+ENV UPSTREAM_1 "8.8.8.8"
+ENV UPSTREAM_2 "8.8.4.4"
+
+ADD run.sh /app/run.sh
+
+CMD sh /app/run.sh

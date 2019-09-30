@@ -7,14 +7,19 @@ RUN apt-get update && \
     apt-get autoclean --yes && \
     apt-get clean --yes
 
-RUN cd /etc/dnsmasq.d && \
-    curl -O https://raw.githubusercontent.com/cokebar/gfwlist2dnsmasq/master/gfwlist2dnsmasq.sh && \
-    bash gfwlist2dnsmasq.sh -p 5311 -o gfwlist2dnsmasq.conf && \
-    curl -O https://raw.githubusercontent.com/felixonmars/dnsmasq-china-list/master/accelerated-domains.china.conf && \
-    rm -rf gfwlist2dnsmasq.sh && \
-    echo 'server=127.0.0.1#5322' >> /etc/dnsmasq.conf && \
+ADD accelerated-domains.china.conf /etc/dnsmasq.d
+ADD gfwlist2dnsmasq.conf /etc/dnsmasq.d
+
+ENV CHINA_DNS "114.114.114.114"
+ENV CLOUDFLARED_IP "172.22.0.4#5311"
+ENV CHINADNS_IP "172.22.0.2#5322"
+
+RUN echo '' >> /etc/dnsmasq.conf && \
+    echo 'server=172.22.0.2#5322' >> /etc/dnsmasq.conf && \
     echo 'conf-dir=/etc/dnsmasq.d/,*.conf' >> /etc/dnsmasq.conf
 
-EXPOSE 53 53/udp
+EXPOSE 5300 5300/udp
 
-CMD dnsmasq -k
+ADD run.sh /app/run.sh
+
+CMD sh /app/run.sh
